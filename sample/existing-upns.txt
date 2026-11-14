@@ -1,0 +1,5 @@
+# UPNs that already exist in the (fictional) tenant — used by -Offline dry runs
+priya.shah@contoso.com
+daniel.chen@contoso.com
+dana.brooks@contoso.com
+kevin.chen@contoso.com

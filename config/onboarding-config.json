@@ -1,0 +1,19 @@
+{
+  "Domain": "contoso.com",
+  "UsageLocation": "US",
+  "BaseGroups": [
+    "All Staff",
+    "MFA Registration - Required"
+  ],
+  "DepartmentGroups": {
+    "Finance": ["Finance Team", "NetSuite Users"],
+    "Sales": ["Sales Team", "Salesforce Users"],
+    "Marketing": ["Marketing Team", "Adobe Creative Cloud Users"],
+    "IT": ["IT Service Desk", "Intune Helpdesk Operators"],
+    "Operations": ["Operations Team", "Warehouse Scanner Users"]
+  },
+  "LicenseByEmployeeType": {
+    "Employee": "SPE_E3",
+    "Contractor": "SPE_F1"
+  }
+}

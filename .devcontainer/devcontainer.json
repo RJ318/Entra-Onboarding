@@ -1,0 +1,13 @@
+{
+  "name": "Entra onboarding demo (PowerShell 7 + Pester)",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/powershell:1": { "modules": "Pester" },
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+  },
+  "postAttachCommand": "pwsh -NoLogo -File ./tools/demo.ps1",
+  "customizations": {
+    "vscode": { "extensions": ["ms-vscode.powershell"] },
+    "codespaces": { "openFiles": ["README.md", "sample/new-hires.csv"] }
+  }
+}

@@ -1,0 +1,101 @@
+name: CI
+
+# Runs on every push, every pull request, every Monday, and on demand.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-demo:
+    name: Tests, dry run, and browser parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester 5
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -Force
+
+      - name: Run Pester tests
+        shell: pwsh
+        run: |
+          Import-Module Pester -MinimumVersion 5.5.0
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests'
+          $config.Run.PassThru = $true
+          $config.Output.Verbosity = 'Detailed'
+          $result = Invoke-Pester -Configuration $config
+          New-Item -ItemType Directory -Force -Path _site | Out-Null
+          [ordered]@{
+            passed = $result.PassedCount; failed = $result.FailedCount
+            skipped = $result.SkippedCount; total = $result.TotalCount
+            seconds = [math]::Round($result.Duration.TotalSeconds, 1)
+          } | ConvertTo-Json | Set-Content -Path _site/pester.json
+          "### Pester: $($result.PassedCount) of $($result.TotalCount) tests passed" >> $env:GITHUB_STEP_SUMMARY
+          if ($result.FailedCount -gt 0) { exit 1 }
+
+      - name: Offline dry runs (no tenant, no changes)
+        shell: pwsh
+        run: |
+          $PSStyle.OutputRendering = 'PlainText'
+          New-Item -ItemType Directory -Force -Path _run | Out-Null
+          ./Invoke-Onboarding.ps1 -CsvPath ./sample/new-hires.csv -Offline `
+            -ExistingUpnsPath ./sample/existing-upns.txt -LogDirectory ./_run/sample *>&1 |
+            Tee-Object -FilePath ./_run/dry-run.txt
+          ./Invoke-Onboarding.ps1 -CsvPath ./sample/edge-cases.csv -Offline `
+            -ExistingUpnsPath ./sample/edge-cases-existing.txt -LogDirectory ./_run/edge *>&1 |
+            Tee-Object -FilePath ./_run/edge-cases.txt
+          '### Offline dry run' >> $env:GITHUB_STEP_SUMMARY
+          '```' >> $env:GITHUB_STEP_SUMMARY
+          Get-Content ./_run/dry-run.txt >> $env:GITHUB_STEP_SUMMARY
+          '```' >> $env:GITHUB_STEP_SUMMARY
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Browser demo parity check
+        run: |
+          node tools/check-parity.mjs sample/new-hires.csv sample/existing-upns.txt _run/sample/onboarding-plan-*.csv | tee _run/parity.txt
+          node tools/check-parity.mjs sample/edge-cases.csv sample/edge-cases-existing.txt _run/edge/onboarding-plan-*.csv | tee -a _run/parity.txt
+          { echo '### Browser parity'; cat _run/parity.txt; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Assemble demo site
+        run: |
+          cp -r site/. _site/
+          cp -r sample config _site/
+          node tools/write-run-info.mjs
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: _site
+
+  deploy:
+    name: Publish demo to GitHub Pages
+    needs: test-and-demo
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

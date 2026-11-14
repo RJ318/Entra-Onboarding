@@ -1,0 +1,4 @@
+# UPNs that already exist in the (fictional) tenant, used for the edge-case parity check
+sam.lee@contoso.com
+
+SAM.LEE3@CONTOSO.COM

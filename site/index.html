@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Entra ID New-Hire Onboarding · Live demo · Ravi S. Jethva</title>
+<meta name="description" content="Try a PowerShell 7 + Microsoft Graph onboarding module in your browser: paste a new-hire CSV and see validation, collision-safe UPNs, groups, and licenses. Tests and a dry run run automatically on every push.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #f2f5f3; --surface: #ffffff; --surface-2: #e7ede9; --ink: #13201b; --ink-2: #4a5b54;
+    --rule: #d3ddd8; --accent: #0b6b4d; --accent-ink: #ffffff; --accent-soft: #dcefe6;
+    --crit: #b3261e; --crit-soft: #fbe3e1; --info: #1d4e89; --info-soft: #e1ebf7;
+    --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --radius: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0d1411; --surface: #141d19; --surface-2: #1b2621; --ink: #e3ece7; --ink-2: #9db0a7;
+      --rule: #2a3832; --accent: #4cc795; --accent-ink: #06231a; --accent-soft: #173a2d;
+      --crit: #ff8a80; --crit-soft: #3d1614; --info: #8db8f0; --info-soft: #14263d;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 400 16px/1.55 var(--font-body); }
+  a { color: var(--accent); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 64px; }
+  header.top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding-bottom: 14px; border-bottom: 1px solid var(--rule); font-size: 0.9375rem; }
+  header.top a { text-decoration: none; }
+  .eyebrow { font: 500 0.8125rem/1.4 var(--font-mono); color: var(--accent); letter-spacing: 0.02em; margin: 28px 0 6px; }
+  h1 { font: 700 2.5rem/1.1 var(--font-display); margin: 0 0 10px; letter-spacing: -0.01em; }
+  h2 { font: 600 1.3125rem/1.25 var(--font-display); margin: 0 0 6px; }
+  .lede { font-size: 1.0625rem; color: var(--ink-2); max-width: 760px; margin: 0 0 18px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: var(--radius);
+    border: 1px solid var(--rule); background: var(--surface); color: var(--ink); font: 500 0.9375rem var(--font-body);
+    text-decoration: none; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .btn--primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+  .status { display: inline-flex; align-items: center; gap: 8px; font: 500 0.8125rem var(--font-mono); color: var(--ink-2); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-2); flex: none; }
+  .dot.ok { background: var(--accent); } .dot.bad { background: var(--crit); }
+  section.card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px; margin-top: 22px; }
+  .sub { color: var(--ink-2); font-size: 0.9375rem; margin: 0 0 14px; }
+  .grid2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } h1 { font-size: 2rem; } }
+  label { display: block; font: 600 0.8125rem var(--font-mono); color: var(--ink-2); margin-bottom: 6px; }
+  textarea { width: 100%; min-height: 220px; resize: vertical; padding: 10px 12px; border-radius: var(--radius);
+    border: 1px solid var(--rule); background: var(--surface-2); color: var(--ink); font: 400 0.8125rem/1.5 var(--font-mono); white-space: pre; }
+  .row-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .row-actions .btn { padding: 6px 10px; font-size: 0.8125rem; }
+  .summary { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 10px; font: 500 0.9375rem var(--font-body); }
+  .pill { padding: 3px 10px; border-radius: 999px; font: 500 0.8125rem var(--font-mono); }
+  .pill.ok { background: var(--accent-soft); color: var(--accent); } .pill.bad { background: var(--crit-soft); color: var(--crit); }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.875rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font: 600 0.75rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink-2); background: var(--surface-2); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td.mono { font-family: var(--font-mono); font-size: 0.8125rem; white-space: nowrap; }
+  td.err { color: var(--crit); min-width: 220px; }
+  .tag { font: 600 0.75rem var(--font-mono); padding: 2px 7px; border-radius: 4px; }
+  .tag.ok { background: var(--accent-soft); color: var(--accent); } .tag.bad { background: var(--crit-soft); color: var(--crit); }
+  details { margin-top: 12px; } summary { cursor: pointer; font-weight: 600; }
+  .whatif { font: 400 0.8125rem/1.6 var(--font-mono); background: var(--surface-2); border-radius: var(--radius); padding: 10px 12px; margin-top: 8px; overflow-x: auto; white-space: pre; }
+  .terminal { background: #0f1a15; color: #d7e6de; border-radius: var(--radius); overflow-x: auto; }
+  .terminal pre { margin: 0; padding: 14px 16px; font: 400 0.78rem/1.55 var(--font-mono); }
+  .terminal__bar { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 14px; border-bottom: 1px solid #22332b; font: 400 0.75rem var(--font-mono); color: #8fa89b; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat { border: 1px solid var(--rule); border-radius: var(--radius); padding: 10px 12px; background: var(--surface-2); }
+  .stat b { display: block; font: 700 1.5rem/1.1 var(--font-display); }
+  .stat span { font-size: 0.8125rem; color: var(--ink-2); }
+  ol.flow { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; counter-reset: s; }
+  ol.flow li { counter-increment: s; border: 1px solid var(--rule); border-radius: var(--radius); padding: 10px 12px; font-size: 0.875rem; background: var(--surface-2); }
+  ol.flow li::before { content: counter(s); display: block; font: 500 0.75rem var(--font-mono); color: var(--accent); }
+  ol.flow b { display: block; font: 600 1rem var(--font-display); }
+  footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 0.875rem; color: var(--ink-2); }
+  .note { font-size: 0.8125rem; color: var(--ink-2); margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a href="https://github.com/RJ318"><strong>Ravi S. Jethva</strong> · IT Systems Engineer</a>
+    <span><a href="https://www.linkedin.com/in/rj318">LinkedIn</a> · <a href="https://github.com/RJ318/Entra-Onboarding">Source on GitHub</a></span>
+  </header>
+
+  <p class="eyebrow">Personal project · PowerShell 7 · Microsoft Graph · Entra ID (Azure AD)</p>
+  <h1>Entra ID New&#8209;Hire Onboarding</h1>
+  <p class="lede">A PowerShell module that turns an HR new-hire CSV into Microsoft Entra ID accounts. It validates every row, creates collision-safe usernames, assigns groups and licenses by department, runs a dry run before touching the tenant, and never writes a password to a log.</p>
+  <div class="actions">
+    <a class="btn btn--primary" href="#try">Try it below</a>
+    <a class="btn" href="https://codespaces.new/RJ318/Entra-Onboarding?quickstart=1">Run the real PowerShell in Codespaces</a>
+    <a class="btn" href="https://github.com/RJ318/Entra-Onboarding">View the code</a>
+    <span class="status" id="ci-status"><span class="dot"></span>Checking latest automated run…</span>
+  </div>
+
+  <section class="card" id="try" aria-labelledby="try-h">
+    <h2 id="try-h">Try it: paste or edit a new-hire CSV</h2>
+    <p class="sub">The plan updates as you type. Change a department, add a second person with the same name, or break a date to watch the checks catch it. Nothing leaves your browser.</p>
+    <div class="grid2">
+      <div>
+        <label for="csv">new-hires.csv</label>
+        <textarea id="csv" spellcheck="false" aria-describedby="csv-help"></textarea>
+        <div class="row-actions" id="csv-help">
+          <button class="btn" type="button" data-load="sample">Load sample</button>
+          <button class="btn" type="button" data-load="edge">Load edge cases</button>
+          <button class="btn" type="button" data-load="blank">Header only</button>
+        </div>
+      </div>
+      <div>
+        <label for="existing">Accounts already in the tenant (one UPN per line)</label>
+        <textarea id="existing" spellcheck="false" style="min-height:120px"></textarea>
+        <label for="config" style="margin-top:12px">onboarding-config.json</label>
+        <textarea id="config" spellcheck="false" style="min-height:160px"></textarea>
+      </div>
+    </div>
+
+    <div class="summary" id="summary" aria-live="polite"></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Row</th><th>Status</th><th>User principal name</th><th>Department</th><th>License</th><th>Groups</th><th>Errors</th></tr></thead>
+        <tbody id="plan"></tbody>
+      </table>
+    </div>
+    <details>
+      <summary>What a live run would do in Microsoft Graph (the -WhatIf view)</summary>
+      <div class="whatif" id="whatif"></div>
+    </details>
+    <p class="note">This page runs a JavaScript copy of the module's validation and planning rules so you can try it without installing anything. On every push, CI runs the PowerShell module and this copy on the same files and fails the build if their plans differ in any field. Creating users needs the real module and a tenant.</p>
+  </section>
+
+  <section class="card" aria-labelledby="run-h">
+    <h2 id="run-h">Latest automated run</h2>
+    <p class="sub">GitHub Actions runs this on every push and every Monday, with nobody watching: the Pester tests, the offline dry run below, and the browser-parity check. This page is then republished with that run's real output.</p>
+    <div class="stats" id="stats"></div>
+    <div class="terminal">
+      <div class="terminal__bar"><span>pwsh · offline dry run · output from the latest CI run</span><span id="run-meta"></span></div>
+      <pre id="dryrun">Loading…</pre>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="how-h">
+    <h2 id="how-h">How it works</h2>
+    <ol class="flow">
+      <li><b>Validate</b>Required fields, department and license mapping, yyyy-MM-dd dates, manager UPN, 2-letter country.</li>
+      <li><b>Plan</b>first.last@domain, then first.last2, checked against the tenant and earlier rows in the same file.</li>
+      <li><b>Review</b>-Offline (no tenant) or -WhatIf (real collision checks), and the plan is saved to CSV.</li>
+      <li><b>Create</b>User, license, groups, and manager through Graph with least-privilege scopes.</li>
+      <li><b>Log</b>Created, Partial, Failed, or Skipped per row. Temporary passwords are never written to the log.</li>
+    </ol>
+  </section>
+
+  <footer>
+    Built by Ravi S. Jethva with Claude as a coding partner. Fictional sample data (contoso.com).
+    Status: 27 Pester tests against a fake Graph adapter; run live in a Microsoft 365 developer (test) tenant; never run against a production tenant.
+  </footer>
+</div>
+
+<script type="module">
+import { buildPlan, parseCsv, parseExistingUpns } from './onboarding-rules.js';
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const HEADER = 'FirstName,LastName,Department,JobTitle,EmployeeType,StartDate,ManagerUpn,UsageLocation';
+
+async function text(path) {
+  const r = await fetch(path, { cache: 'no-cache' });
+  if (!r.ok) throw new Error(`${path}: ${r.status}`);
+  return r.text();
+}
+
+const files = {};
+async function loadFiles() {
+  const [sample, sampleExisting, edge, edgeExisting, config] = await Promise.all([
+    text('sample/new-hires.csv'), text('sample/existing-upns.txt'),
+    text('sample/edge-cases.csv'), text('sample/edge-cases-existing.txt'),
+    text('config/onboarding-config.json'),
+  ]);
+  Object.assign(files, { sample, sampleExisting, edge, edgeExisting, config });
+}
+
+function load(which) {
+  if (which === 'sample') { $('csv').value = files.sample.trim(); $('existing').value = files.sampleExisting.trim(); }
+  if (which === 'edge') { $('csv').value = files.edge.trim(); $('existing').value = files.edgeExisting.trim(); }
+  if (which === 'blank') { $('csv').value = HEADER + '\n'; }
+  render();
+}
+
+function render() {
+  let config;
+  try { config = JSON.parse($('config').value); }
+  catch (e) {
+    $('summary').innerHTML = `<span class="pill bad">Config isn't valid JSON: ${esc(e.message)}</span>`;
+    return;
+  }
+  const records = parseCsv($('csv').value);
+  const plan = buildPlan(records, config, parseExistingUpns($('existing').value));
+  const ready = plan.filter((p) => p.Status === 'Ready');
+  const invalid = plan.length - ready.length;
+  $('summary').innerHTML =
+    `<span>Onboarding plan: ${plan.length} row${plan.length === 1 ? '' : 's'}</span>` +
+    `<span class="pill ok">${ready.length} ready</span>` +
+    `<span class="pill ${invalid ? 'bad' : 'ok'}">${invalid} need fixing</span>`;
+
+  $('plan').innerHTML = plan.length ? plan.map((p) => `
+    <tr>
+      <td class="mono">${p.Row}</td>
+      <td><span class="tag ${p.Status === 'Ready' ? 'ok' : 'bad'}">${p.Status}</span></td>
+      <td class="mono">${esc(p.UserPrincipalName ?? '')}</td>
+      <td>${esc(p.Department)}</td>
+      <td class="mono">${esc(p.License ?? '')}</td>
+      <td title="${esc(p.Groups.join('\n'))}">${p.Groups.length}<br><small>${esc(p.Groups.join(', '))}</small></td>
+      <td class="err">${esc(p.Errors)}</td>
+    </tr>`).join('') : '<tr><td colspan="7">Add rows under the header to see a plan.</td></tr>';
+
+  $('whatif').textContent = ready.length ? ready.map((p) =>
+    `What if: Performing the operation "Create user; license ${p.License ?? ''}; add to ${p.Groups.length} groups` +
+    `${p.ManagerUpn ? `; manager ${p.ManagerUpn}` : ''}" on target "${p.UserPrincipalName}".`).join('\n')
+    : 'No ready rows, so a live run would make no Graph calls.';
+}
+
+async function loadRun() {
+  try {
+    const run = JSON.parse(await text('latest-run.json'));
+    const ok = run.pester.failed === 0 && run.parity.every((l) => l.startsWith('Parity OK'));
+    $('ci-status').innerHTML = `<span class="dot ${ok ? 'ok' : 'bad'}"></span>` +
+      `<a href="${esc(run.runUrl)}">Latest automated run ${ok ? 'passed' : 'failed'}</a> · ${esc(new Date(run.generatedAt).toLocaleString())}`;
+    $('stats').innerHTML = `
+      <div class="stat"><b>${run.pester.passed}/${run.pester.total}</b><span>Pester tests passed</span></div>
+      <div class="stat"><b>${run.parity.filter((l) => l.startsWith('Parity OK')).length}/${run.parity.length}</b><span>browser-parity checks passed</span></div>
+      <div class="stat"><b>${esc(run.trigger)}</b><span>what started the run</span></div>
+      <div class="stat"><b><a href="${esc(run.commitUrl)}">${esc(run.commit.slice(0, 7))}</a></b><span>commit tested</span></div>`;
+    $('run-meta').innerHTML = `<a style="color:#9fe2c2" href="${esc(run.runUrl)}">view full log</a>`;
+    $('dryrun').textContent = run.dryRun;
+  } catch {
+    $('ci-status').innerHTML = '<span class="dot"></span>Automated run results appear here once CI has published the site.';
+    $('dryrun').textContent = 'No CI output found. Open this page from GitHub Pages, or run: pwsh ./tools/demo.ps1';
+  }
+}
+
+for (const id of ['csv', 'existing', 'config']) $(id).addEventListener('input', render);
+document.querySelectorAll('[data-load]').forEach((b) => b.addEventListener('click', () => load(b.dataset.load)));
+
+try {
+  await loadFiles();
+  $('config').value = files.config.trim();
+  load('sample');
+} catch (e) {
+  $('summary').innerHTML = `<span class="pill bad">Couldn't load the sample files (${esc(e.message)}). Serve this folder over HTTP.</span>`;
+}
+loadRun();
+</script>
+</body>
+</html>

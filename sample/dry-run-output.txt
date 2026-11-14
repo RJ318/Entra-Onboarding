@@ -1,0 +1,20 @@
+PS> ./Invoke-Onboarding.ps1 -CsvPath ./sample/new-hires.csv -Offline -ExistingUpnsPath ./sample/existing-upns.txt
+
+Onboarding plan: 9 rows · 7 ready · 2 need fixing
+
+Row Status  UserPrincipalName         Department License Groups Errors
+--- ------  -----------------         ---------- ------- ------ ------
+  2 Ready   maria.alvarez@contoso.com Finance    SPE_E3       4 
+  3 Ready   jose.martinez@contoso.com Sales      SPE_E3       4 
+  4 Ready   aisha.obrien@contoso.com  Marketing  SPE_F1       4 
+  5 Ready   daniel.chen2@contoso.com  IT         SPE_E3       4 
+  6 Ready   daniel.chen3@contoso.com  Operations SPE_E3       4 
+  7 Ready   priya.shah2@contoso.com   Finance    SPE_E3       4 
+  8 Invalid                           Legal      SPE_E3       2 Department 'Legal' has no group mapping in the config.
+  9 Invalid                           Sales                   4 EmployeeType 'Intern' has no license mapping in the config. StartDate '10/05/2026' must be yyyy-
+                                                                MM-dd.
+ 10 Ready   zoe.lindqvist@contoso.com Marketing  SPE_E3       4 
+
+
+Plan saved: ./logs/onboarding-plan-20260922-100659.csv
+Offline dry run: no changes made.

@@ -1,0 +1,14 @@
+FirstName,LastName,Department,JobTitle,EmployeeType,StartDate,ManagerUpn,UsageLocation
+  Ana  ,Ñúñez,finance,"Analyst, FP&A",Employee,2026-11-02,dana.brooks@contoso.com,us
+Mary-Kate,O'Connor-Smith,Sales,Account Manager,contractor,2026-11-02,kevin.chen@contoso.com,
+Sam,Lee,IT,Desktop Engineer,Employee,2026-11-02,sam.turner@contoso.com,US
+Sam,Lee,IT,Systems Engineer,Employee,2026-11-09,sam.turner@contoso.com,US
+Sam,Lee,Operations,Coordinator,Employee,2026-11-16,omar.patel@contoso.com,US
+!!!,Wright,Marketing,Designer,Employee,2026-11-02,lena.fischer@contoso.com,US
+Bartholomew-Alexander,Featherstonehaugh-Montgomery-Wolfeschlegelsteinhausen,Operations,Analyst,Employee,2026-11-02,,US
+Leap,Year,Finance,Accountant,Employee,2028-02-29,dana.brooks@contoso.com,US
+Bad,Date,Finance,Accountant,Employee,2026-02-30,dana.brooks@contoso.com,US
+Bad,Manager,Sales,Rep,Employee,2026-11-02,kevin.chen,US
+Bad,Country,Sales,Rep,Employee,2026-11-02,kevin.chen@contoso.com,USA
+,Missing,,,Employee,,,
+Zoë,Ångström,Marketing,Writer,Contractor,2026-11-02,lena.fischer@contoso.com,se

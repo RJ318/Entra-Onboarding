@@ -1,0 +1,10 @@
+FirstName,LastName,Department,JobTitle,EmployeeType,StartDate,ManagerUpn,UsageLocation
+Maria,Alvarez,Finance,Staff Accountant,Employee,2026-10-05,dana.brooks@contoso.com,US
+José,Martínez,Sales,Account Executive,Employee,2026-10-05,kevin.chen@contoso.com,US
+Aisha,O'Brien,Marketing,Content Designer,Contractor,2026-10-12,lena.fischer@contoso.com,US
+Daniel,Chen,IT,Service Desk Analyst,Employee,2026-10-05,sam.turner@contoso.com,US
+Daniel,Chen,Operations,Warehouse Coordinator,Employee,2026-10-19,omar.patel@contoso.com,US
+Priya,Shah,Finance,Financial Analyst,Employee,2026-10-05,dana.brooks@contoso.com,US
+Tyler,Nguyen,Legal,Paralegal,Employee,2026-10-05,,US
+Grace,Kim,Sales,Sales Development Rep,Intern,10/05/2026,kevin.chen@contoso.com,US
+Zoë,Lindqvist,Marketing,Brand Manager,Employee,2026-10-12,lena.fischer@contoso.com,GB
